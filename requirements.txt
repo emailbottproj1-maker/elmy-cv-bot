@@ -1,0 +1,5 @@
+openpyxl==3.1.5
+python-dotenv==1.0.1
+requests==2.32.3
+Pillow==11.1.0
+pyinstaller==6.11.1

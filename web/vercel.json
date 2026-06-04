@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/login.py":     { "runtime": "@vercel/python@4.3.0" },
+    "api/me.py":        { "runtime": "@vercel/python@4.3.0" },
+    "api/campaigns.py": { "runtime": "@vercel/python@4.3.0" },
+    "api/companies.py": { "runtime": "@vercel/python@4.3.0" },
+    "api/sectors.py":   { "runtime": "@vercel/python@4.3.0" },
+    "api/upload.py":    { "runtime": "@vercel/python@4.3.0" },
+    "api/stats.py":     { "runtime": "@vercel/python@4.3.0" },
+    "api/tick.py":      { "runtime": "@vercel/python@4.3.0", "maxDuration": 30 },
+    "api/pixel.py":     { "runtime": "@vercel/python@4.3.0" }
+  },
+  "rewrites": [
+    { "source": "/", "destination": "/public/index.html" }
+  ]
+}

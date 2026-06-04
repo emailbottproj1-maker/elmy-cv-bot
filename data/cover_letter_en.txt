@@ -1,0 +1,10 @@
+Dear {company_name} Hiring Team,
+
+I am writing to express my strong interest in joining {company_name}. Please find my CV attached for your review.
+
+I believe my skills and experience would be a valuable addition to your team, and I would welcome the opportunity to discuss how I can contribute to {company_name}'s continued success.
+
+Thank you for your time and consideration.
+
+Best regards,
+{sender_name}

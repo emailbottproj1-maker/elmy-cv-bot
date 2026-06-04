@@ -1,0 +1,47 @@
+# Secrets & client data
+.env
+client-data/
+data/*.xlsx
+data/*.pdf
+data/cover_letter_*.txt
+data/tracking.db
+data/*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Build
+build/
+dist/
+*.spec
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+
+# Vercel / Supabase local
+.vercel/
+.supabase/
+
+# Local sqlite + edge profile (testing artifacts)
+data/companies_db.sqlite
+tests/_edge_profile*/
+tests/_*.png
+tests/_*.pdf
+tests/_*.html
+
+# Keep the cover-letter templates AND sample list (they are part of the demo)
+!data/cover_letter_ar.txt
+!data/cover_letter_en.txt
+!data/companies_sample.xlsx
+!data/companies_sample_list.xlsx

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#2563eb" />
+<title>Elmy CV Bot — منصة إرسال السير الذاتية</title>
+<link rel="stylesheet" href="/public/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">📨</span>
+      <span class="title">Elmy CV Bot</span>
+    </div>
+    <button id="logoutBtn" class="ghost hidden">خروج</button>
+  </header>
+
+  <main id="app"></main>
+
+  <!-- ===== Templates ===== -->
+  <template id="tpl-login">
+    <section class="card center">
+      <h1>تسجيل الدخول</h1>
+      <p class="muted">المنصة خاصة. أدخل كلمة المرور للمتابعة.</p>
+      <form id="loginForm" class="form">
+        <label>كلمة المرور
+          <input type="password" name="password" required autocomplete="current-password" />
+        </label>
+        <button class="primary" type="submit">دخول</button>
+        <div class="err" id="loginErr"></div>
+      </form>
+    </section>
+  </template>
+
+  <template id="tpl-campaigns">
+    <section class="card">
+      <div class="row spread">
+        <h1>الحملات</h1>
+        <button class="primary" id="newCampaignBtn">+ حملة جديدة</button>
+      </div>
+      <p class="muted small">حملة لكل عميل من عملائك. كل حملة تُرسل إلى قائمة الشركات الكاملة.</p>
+      <div id="campaignList" class="campaign-list"></div>
+    </section>
+  </template>
+
+  <template id="tpl-new-campaign">
+    <section class="card">
+      <button class="ghost" id="backBtn">← رجوع</button>
+      <h1>حملة جديدة</h1>
+      <p class="muted small">اسم العميل (داخلي للتمييز) + بيانات الإرسال.</p>
+      <form id="newCampForm" class="form">
+        <label>اسم العميل (لتمييز الحملة)
+          <input name="customer_label" required maxlength="80" placeholder="مثال: أحمد - مطوّر سينيور" />
+        </label>
+
+        <label>ملف الـ CV (PDF فقط)
+          <input type="file" name="cv" accept="application/pdf" required />
+        </label>
+
+        <label>اسم المرسِل (يظهر للشركة)
+          <input name="sender_name" required maxlength="80" />
+        </label>
+
+        <div class="row">
+          <label class="grow">عنوان الإيميل (عربي)
+            <input name="subject_ar" required maxlength="120" value="طلب توظيف - سيرة ذاتية" />
+          </label>
+        </div>
+        <div class="row">
+          <label class="grow">عنوان الإيميل (English)
+            <input name="subject_en" required maxlength="120" value="Job Application - CV" />
+          </label>
+        </div>
+
+        <label>نص الرسالة (عربي) — يدعم <code>{company_name}</code> و<code>{sender_name}</code>
+          <textarea name="cover_letter_ar" rows="6" required></textarea>
+        </label>
+        <label>نص الرسالة (English)
+          <textarea name="cover_letter_en" rows="6" required></textarea>
+        </label>
+
+        <label>تخصص العميل (يحدد الشركات المستهدفة)
+          <select name="target_sector" id="sectorSelect" required>
+            <option value="">جاري التحميل...</option>
+          </select>
+        </label>
+
+        <label>حجم الباقة (عدد الشركات لهذا العميل)
+          <select name="package_size" required>
+            <option value="20">20 شركة</option>
+            <option value="40" selected>40 شركة</option>
+            <option value="80">80 شركة</option>
+            <option value="all">كل شركات التخصص المتاحة</option>
+          </select>
+        </label>
+        <p class="muted small">
+          البوت يختار شركات عشوائية لم تُستخدم في حملات سابقة. إذا انتهت
+          الشركات الجديدة، يُعاد استخدام شركات سابقة مع تنبيه واضح.
+        </p>
+
+        <label class="toggle">
+          <input type="checkbox" name="use_ai" checked />
+          <span>استخدم الذكاء الاصطناعي (Gemini) لكتابة رسالة مخصّصة لكل شركة (مع رجوع آمن للقالب)</span>
+        </label>
+
+        <button class="primary" type="submit" id="createBtn">إنشاء الحملة</button>
+        <div class="err" id="newErr"></div>
+        <div class="progress hidden" id="newProgress">جاري الرفع...</div>
+      </form>
+    </section>
+  </template>
+
+  <template id="tpl-campaign-detail">
+    <section class="card">
+      <button class="ghost" id="backBtn">← رجوع</button>
+      <h1 id="cdTitle">حملة</h1>
+      <div class="status-row">
+        <span id="cdStatus" class="pill">—</span>
+        <div class="actions">
+          <button class="primary" data-act="active">▶ ابدأ</button>
+          <button class="warn"    data-act="paused">⏸ إيقاف مؤقت</button>
+          <button class="danger"  data-act="stopped">⏹ إيقاف</button>
+          <button class="ghost"   id="refreshStats">🔄 تحديث</button>
+        </div>
+      </div>
+
+      <div class="counts-grid" id="cdCounts"></div>
+      <div class="bar"><div id="cdBar"></div></div>
+
+      <h2>الشركات التي فتحت الإيميل</h2>
+      <div id="cdOpens" class="opens-list">—</div>
+    </section>
+  </template>
+
+  <script src="/public/app.js"></script>
+</body>
+</html>
