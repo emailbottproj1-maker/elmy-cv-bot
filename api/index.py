@@ -19,7 +19,27 @@ from flask import Flask, Response, jsonify, make_response, request
 
 from bot.supabase_db import SupabaseDB, SupabaseError
 
-app = Flask(__name__)
+_public = os.path.join(_root, "web", "public")
+app = Flask(__name__, static_folder=_public, static_url_path="")
+
+
+# ─── Static files ────────────────────────────────────────────────────────────
+
+@app.route("/")
+@app.route("/index.html")
+def index():
+    return app.send_static_file("index.html")
+
+
+@app.route("/app.js")
+def appjs():
+    return app.send_static_file("app.js")
+
+
+@app.route("/style.css")
+def stylecss():
+    return app.send_static_file("style.css")
+
 
 # ─── Auth ────────────────────────────────────────────────────────────────────
 
