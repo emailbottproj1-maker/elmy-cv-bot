@@ -1,0 +1,7 @@
+{
+  "outputDirectory": "web/public",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index" },
+    { "source": "/", "destination": "/index.html" }
+  ]
+}
