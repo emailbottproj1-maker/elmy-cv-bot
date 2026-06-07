@@ -20,25 +20,35 @@ from flask import Flask, Response, jsonify, make_response, request
 from bot.supabase_db import SupabaseDB, SupabaseError
 
 _public = os.path.join(_root, "web", "public")
-app = Flask(__name__, static_folder=_public, static_url_path="")
+app = Flask(__name__)
 
 
 # ─── Static files ────────────────────────────────────────────────────────────
 
+def _serve(filename: str, mime: str):
+    path = os.path.join(_public, filename)
+    try:
+        with open(path, "rb") as f:
+            data = f.read()
+        return Response(data, mimetype=mime)
+    except FileNotFoundError:
+        return Response(f"File not found: {path}", status=404)
+
+
 @app.route("/")
 @app.route("/index.html")
 def index():
-    return app.send_static_file("index.html")
+    return _serve("index.html", "text/html; charset=utf-8")
 
 
 @app.route("/app.js")
 def appjs():
-    return app.send_static_file("app.js")
+    return _serve("app.js", "application/javascript; charset=utf-8")
 
 
 @app.route("/style.css")
 def stylecss():
-    return app.send_static_file("style.css")
+    return _serve("style.css", "text/css; charset=utf-8")
 
 
 # ─── Auth ────────────────────────────────────────────────────────────────────
