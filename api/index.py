@@ -50,6 +50,15 @@ def stylecss():
     return _serve("style.css", "text/css; charset=utf-8")
 
 
+# ─── Debug (remove after confirming) ────────────────────────────────────────
+
+@app.route("/debug-files")
+def debug_files():
+    import glob
+    files = sorted(glob.glob("/var/task/**", recursive=True))[:80]
+    return jsonify({"root": _root, "public": _public, "files": files})
+
+
 # ─── Auth ────────────────────────────────────────────────────────────────────
 
 COOKIE_NAME = "elmy_auth"
