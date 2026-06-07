@@ -19,7 +19,7 @@ from flask import Flask, Response, jsonify, make_response, request
 
 from bot.supabase_db import SupabaseDB, SupabaseError
 
-_public = os.path.join(_root, "public")
+_public = os.path.join(_root, "static")
 app = Flask(__name__)
 
 

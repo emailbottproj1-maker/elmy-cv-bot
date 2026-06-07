@@ -45,3 +45,5 @@ tests/_*.html
 !data/cover_letter_en.txt
 !data/companies_sample.xlsx
 !data/companies_sample_list.xlsx
+
+.vercel
