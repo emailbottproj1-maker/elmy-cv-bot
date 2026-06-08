@@ -308,29 +308,14 @@ async function loadDetail(id) {
     const counts = sd.counts || {};
     const sent = counts.sent || 0, failed = counts.failed || 0;
     const pending = counts.pending || 0, total = counts.total || 0;
-    const opened = (sd.opens || []).length;
-
     $("#cdCounts").innerHTML = `
       ${cell("الإجمالي", total)}
       ${cell("مُرسَل", sent)}
       ${cell("فشل", failed)}
       ${cell("متبقٍ", pending)}
-      ${cell("فُتح", opened)}
     `;
     const pct = total ? Math.round(((sent + failed) / total) * 100) : 0;
     $("#cdBar").style.width = pct + "%";
-
-    const opensBox = $("#cdOpens");
-    if (!sd.opens || !sd.opens.length) opensBox.textContent = "لم تُرصد فتحات بعد.";
-    else {
-      opensBox.innerHTML = "";
-      for (const o of sd.opens) {
-        const d = document.createElement("div"); d.className = "open-item";
-        d.innerHTML = `<span>${esc(o.company_name)}</span>
-          <span class="meta">${o.open_count}× · ${shortDate(o.first_open_at)}</span>`;
-        opensBox.appendChild(d);
-      }
-    }
   } catch (e) {
     console.error(e);
   }
