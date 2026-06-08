@@ -86,17 +86,13 @@
           </select>
         </label>
 
-        <label>حجم الباقة (عدد الشركات لهذا العميل)
-          <select name="package_size" required>
-            <option value="20">20 شركة</option>
-            <option value="40" selected>40 شركة</option>
-            <option value="80">80 شركة</option>
-            <option value="all">كل شركات التخصص المتاحة</option>
-          </select>
+        <label>حجم الباقة (عدد الشركات) — أو اكتب 0 لكل الشركات المتاحة
+          <input type="number" name="package_size" min="1" value="40" required
+            placeholder="مثال: 40" style="width:100%" />
         </label>
         <p class="muted small">
-          البوت يختار شركات عشوائية لم تُستخدم في حملات سابقة. إذا انتهت
-          الشركات الجديدة، يُعاد استخدام شركات سابقة مع تنبيه واضح.
+          البوت يختار شركات عشوائية لم تُستخدم في حملات سابقة. اكتب العدد الذي تريده.
+          إذا انتهت الشركات الجديدة، يُعاد استخدام شركات سابقة مع تنبيه واضح.
         </p>
 
         <label class="toggle">

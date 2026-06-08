@@ -203,7 +203,7 @@ function renderNewCampaign() {
         cover_letter_ar: fd.get("cover_letter_ar"),
         cover_letter_en: fd.get("cover_letter_en"),
         use_ai: !!fd.get("use_ai"),
-        package_size: fd.get("package_size"),  // "20" | "40" | "80" | "all"
+        package_size: fd.get("package_size") === "0" ? "all" : fd.get("package_size"),
         target_sector: fd.get("target_sector") || "any",
       };
       const cr = await fetch("/api/campaigns", {
