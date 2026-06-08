@@ -167,7 +167,6 @@ function renderNewCampaign() {
       sel.innerHTML = '<option value="">تعذّر تحميل التخصصات</option>';
     }
   })();
-}
 
   $("#newCampForm").addEventListener("submit", async (e) => {
     e.preventDefault();
