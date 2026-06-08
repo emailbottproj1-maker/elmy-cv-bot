@@ -130,7 +130,7 @@ class SupabaseDB:
             self._request(
                 "POST", "/companies", body=chunk,
                 headers=self._headers(
-                    "resolution=ignore-duplicates,return=minimal"),
+                    "resolution=merge-duplicates,return=minimal"),
             )
         return len(rows)
 
