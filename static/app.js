@@ -85,6 +85,30 @@ function renderLogin() {
 async function renderCampaigns() {
   tplInto("tpl-campaigns");
   $("#newCampaignBtn").addEventListener("click", renderNewCampaign);
+
+  // Excel import button
+  $("#importBtn").addEventListener("click", () => {
+    const inp = document.createElement("input");
+    inp.type = "file"; inp.accept = ".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    inp.onchange = async () => {
+      const file = inp.files[0]; if (!file) return;
+      const res = $("#importResult");
+      res.textContent = "جاري الاستيراد...";
+      try {
+        const r = await fetch("/api/import", {
+          method: "POST",
+          headers: { "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                     "X-Filename": file.name },
+          body: file,
+        });
+        const d = await r.json();
+        if (!r.ok) { res.textContent = "خطأ: " + (d.error || "فشل الاستيراد"); return; }
+        res.textContent = `✅ تم استيراد ${d.imported} شركة${d.skipped ? ` · تخطي ${d.skipped}` : ""}`;
+      } catch { res.textContent = "تعذّر الاتصال بالخادم."; }
+    };
+    inp.click();
+  });
+
   const list = $("#campaignList");
   list.textContent = "جاري التحميل...";
   try {

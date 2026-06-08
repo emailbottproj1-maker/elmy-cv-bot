@@ -37,9 +37,13 @@
     <section class="card">
       <div class="row spread">
         <h1>الحملات</h1>
-        <button class="primary" id="newCampaignBtn">+ حملة جديدة</button>
+        <div class="row">
+          <button class="ghost" id="importBtn">📥 استيراد شركات (Excel)</button>
+          <button class="primary" id="newCampaignBtn">+ حملة جديدة</button>
+        </div>
       </div>
       <p class="muted small">حملة لكل عميل من عملائك. كل حملة تُرسل إلى قائمة الشركات الكاملة.</p>
+      <div id="importResult" class="muted small" style="margin-top:6px"></div>
       <div id="campaignList" class="campaign-list"></div>
     </section>
   </template>
