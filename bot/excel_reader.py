@@ -102,13 +102,47 @@ def _read_sheet(ws, result: ReadResult, default_lang: str,
         if canon and canon not in col_index:
             col_index[canon] = idx
 
-    # Skip sheet if required columns are absent (e.g. sheets with no email col)
+    # --- auto-detect missing required columns by scanning data rows ---
     missing = [c for c in REQUIRED if c not in col_index]
     if missing:
-        result.errors.append(
-            f"ورقة '{ws.title}': الأعمدة المطلوبة مفقودة ({', '.join(missing)}) — تم تخطي الورقة."
-        )
-        return
+        # Read all data rows once to scan for email/name columns automatically
+        data_rows = list(rows)
+        if not data_rows:
+            return  # nothing to scan
+
+        if "email" in missing:
+            # Find column with the most valid email addresses
+            best_col, best_count = -1, 0
+            for ci in range(len(header)):
+                cnt = sum(1 for r in data_rows
+                          if ci < len(r) and r[ci] and EMAIL_RE.match(str(r[ci]).strip()))
+                if cnt > best_count:
+                    best_count, best_col = cnt, ci
+            if best_col >= 0 and best_count > 0:
+                col_index["email"] = best_col
+                missing = [c for c in missing if c != "email"]
+
+        if "company_name" in missing:
+            # Find the first text column that isn't the email column
+            email_ci = col_index.get("email", -1)
+            for ci in range(len(header)):
+                if ci == email_ci:
+                    continue
+                non_empty = sum(1 for r in data_rows
+                                if ci < len(r) and r[ci] and str(r[ci]).strip())
+                if non_empty > len(data_rows) // 2:  # at least half non-empty
+                    col_index["company_name"] = ci
+                    missing = [c for c in missing if c != "company_name"]
+                    break
+
+        if missing:
+            result.errors.append(
+                f"ورقة '{ws.title}': لم يُعثر على أعمدة ({', '.join(missing)}) — تم تخطي الورقة."
+            )
+            return
+
+        # Re-attach the iterator from our pre-read data
+        rows = iter(data_rows)
 
     # --- data rows ---
     for row_num, row in enumerate(rows, start=2):
