@@ -119,8 +119,12 @@ class EmailSender:
         msg = MIMEMultipart("mixed")
         msg["From"] = formataddr((str(self.sender_name), self.gmail_address))
         msg["To"] = recipient["email"]
+        msg["Reply-To"] = formataddr((str(self.sender_name), self.gmail_address))
         msg["Subject"] = subject
         msg["Message-ID"] = make_msgid(domain=self.gmail_address.split("@")[-1])
+        msg["X-Mailer"] = "Elmy CV Bot"
+        msg["Importance"] = "Normal"
+        msg["X-Priority"] = "3"
 
         alt = MIMEMultipart("alternative")
         alt.attach(MIMEText(text_body, "plain", "utf-8"))
