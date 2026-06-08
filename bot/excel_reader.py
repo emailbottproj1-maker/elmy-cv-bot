@@ -25,20 +25,38 @@ EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 # Column name aliases -> canonical name. Lets the client use Arabic headers too.
 COLUMN_ALIASES = {
+    # company name
     "company_name": "company_name",
     "company": "company_name",
     "company name": "company_name",
+    "name": "company_name",
+    "name_ar": "company_name",
     "الشركة": "company_name",
     "اسم الشركة": "company_name",
+    "اسم": "company_name",
+    "الاسم": "company_name",
+    # email
     "email": "email",
     "e-mail": "email",
     "mail": "email",
     "الايميل": "email",
     "الإيميل": "email",
     "البريد": "email",
+    "البريد الالكتروني": "email",
+    "البريد الإلكتروني": "email",
+    # language
     "language": "language",
     "lang": "language",
     "اللغة": "language",
+    # sector
+    "sector": "sector",
+    "القطاع": "sector",
+    "التخصص": "sector",
+    "المجال": "sector",
+    # city
+    "city": "city",
+    "المدينة": "city",
+    "المدينه": "city",
 }
 
 REQUIRED = ("company_name", "email")
@@ -67,29 +85,16 @@ def _normalize_header(value: Any) -> str | None:
     return COLUMN_ALIASES.get(key, key)
 
 
-def read_companies(path: str, default_lang: str = "en") -> ReadResult:
-    """Read and validate an Excel file. Never raises on bad rows; collects them."""
-    result = ReadResult()
-
-    try:
-        wb = load_workbook(path, read_only=True, data_only=True)
-    except FileNotFoundError:
-        result.errors.append(f"الملف غير موجود: {path}")
-        return result
-    except Exception as exc:  # corrupt file, wrong format, etc.
-        result.errors.append(f"تعذّر فتح ملف Excel: {exc}")
-        return result
-
-    ws = wb.active
+def _read_sheet(ws, result: ReadResult, default_lang: str,
+                default_sector: str | None, seen_emails: set) -> None:
+    """Parse one worksheet into result (modifies in-place)."""
     rows = ws.iter_rows(values_only=True)
 
     # --- header row ---
     try:
         header = next(rows)
     except StopIteration:
-        result.errors.append("الملف فارغ.")
-        wb.close()
-        return result
+        return  # empty sheet, skip silently
 
     col_index: dict[str, int] = {}
     for idx, cell in enumerate(header):
@@ -97,21 +102,18 @@ def read_companies(path: str, default_lang: str = "en") -> ReadResult:
         if canon and canon not in col_index:
             col_index[canon] = idx
 
+    # Skip sheet if required columns are absent (e.g. sheets with no email col)
     missing = [c for c in REQUIRED if c not in col_index]
     if missing:
         result.errors.append(
-            "الأعمدة المطلوبة مفقودة: " + ", ".join(missing)
-            + ". يجب أن يحتوي الملف على عمودي company_name و email."
+            f"ورقة '{ws.title}': الأعمدة المطلوبة مفقودة ({', '.join(missing)}) — تم تخطي الورقة."
         )
-        wb.close()
-        return result
-
-    seen_emails: set[str] = set()
+        return
 
     # --- data rows ---
     for row_num, row in enumerate(rows, start=2):
         if row is None or all(c is None or str(c).strip() == "" for c in row):
-            continue  # skip fully empty rows silently
+            continue
 
         result.total_rows += 1
 
@@ -124,6 +126,8 @@ def read_companies(path: str, default_lang: str = "en") -> ReadResult:
         company = get("company_name")
         email = get("email").lower()
         lang = get("language").lower() or default_lang
+        sector = get("sector") or default_sector
+        city = get("city") or None
 
         if not company:
             result.errors.append(f"صف {row_num}: اسم الشركة فارغ — تم التخطي.")
@@ -148,21 +152,42 @@ def read_companies(path: str, default_lang: str = "en") -> ReadResult:
         # Preserve any extra columns as placeholders
         extra: dict[str, Any] = {}
         for canon, i in col_index.items():
-            if canon in ("company_name", "email", "language"):
+            if canon in ("company_name", "email", "language", "sector", "city"):
                 continue
             if i < len(row) and row[i] is not None:
                 extra[canon] = str(row[i]).strip()
 
-        recipient = {
+        result.recipients.append({
             "company_name": company,
             "email": email,
             "language": lang,
+            "sector": sector,
+            "city": city,
             **extra,
-        }
-        result.recipients.append(recipient)
+        })
+
+
+def read_companies(path: str, default_lang: str = "en",
+                   default_sector: str | None = None) -> ReadResult:
+    """Read and validate an Excel file (all sheets). Never raises on bad rows."""
+    result = ReadResult()
+
+    try:
+        wb = load_workbook(path, read_only=True, data_only=True)
+    except FileNotFoundError:
+        result.errors.append(f"الملف غير موجود: {path}")
+        return result
+    except Exception as exc:
+        result.errors.append(f"تعذّر فتح ملف Excel: {exc}")
+        return result
+
+    seen_emails: set[str] = set()
+    for ws in wb.worksheets:
+        _read_sheet(ws, result, default_lang, default_sector, seen_emails)
 
     wb.close()
     return result
+
 
 
 if __name__ == "__main__":

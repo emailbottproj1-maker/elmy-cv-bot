@@ -86,27 +86,52 @@ async function renderCampaigns() {
   tplInto("tpl-campaigns");
   $("#newCampaignBtn").addEventListener("click", renderNewCampaign);
 
-  // Excel import button
+  // Excel import button — asks for sector first, then opens file picker
   $("#importBtn").addEventListener("click", () => {
-    const inp = document.createElement("input");
-    inp.type = "file"; inp.accept = ".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-    inp.onchange = async () => {
-      const file = inp.files[0]; if (!file) return;
-      const res = $("#importResult");
-      res.textContent = "جاري الاستيراد...";
-      try {
-        const r = await fetch("/api/import", {
-          method: "POST",
-          headers: { "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                     "X-Filename": file.name },
-          body: file,
-        });
-        const d = await r.json();
-        if (!r.ok) { res.textContent = "خطأ: " + (d.error || "فشل الاستيراد"); return; }
-        res.textContent = `✅ تم استيراد ${d.imported} شركة${d.skipped ? ` · تخطي ${d.skipped}` : ""}`;
-      } catch { res.textContent = "تعذّر الاتصال بالخادم."; }
-    };
-    inp.click();
+    const res = $("#importResult");
+    // Show inline sector selector
+    res.innerHTML = `
+      <div style="margin-top:8px;padding:10px;background:var(--surface2);border-radius:8px;">
+        <label style="font-size:.85rem;font-weight:600;">القطاع الذي ستُسند إليه الشركات:</label>
+        <select id="importSector" style="width:100%;margin:6px 0 8px;padding:6px;">
+          <option value="Engineering">هندسة ومقاولات</option>
+          <option value="Healthcare">صحة وطب</option>
+          <option value="Marketing">تسويق وإعلان</option>
+          <option value="Technology">تقنية وبرمجة</option>
+          <option value="Finance">مالية وبنوك</option>
+          <option value="Legal">قانون</option>
+          <option value="Retail">تجزئة وتجارة</option>
+          <option value="Education">تعليم</option>
+          <option value="HR">موارد بشرية</option>
+          <option value="Hospitality">ضيافة وفنادق</option>
+          <option value="Logistics">لوجستيك وشحن</option>
+        </select>
+        <button class="primary" id="importPickFile" style="width:100%">📂 اختر ملف Excel</button>
+      </div>`;
+    $("#importPickFile").addEventListener("click", () => {
+      const sector = $("#importSector").value;
+      const inp = document.createElement("input");
+      inp.type = "file"; inp.accept = ".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+      inp.onchange = async () => {
+        const file = inp.files[0]; if (!file) return;
+        res.textContent = "جاري الاستيراد...";
+        try {
+          const r = await fetch("/api/import", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+              "X-Filename": file.name,
+              "X-Sector": sector,
+            },
+            body: file,
+          });
+          const d = await r.json();
+          if (!r.ok) { res.textContent = "خطأ: " + (d.error || "فشل الاستيراد"); return; }
+          res.textContent = `✅ تم استيراد ${d.imported} شركة في قطاع "${sector}"${d.skipped ? ` · تخطي ${d.skipped}` : ""}`;
+        } catch { res.textContent = "تعذّر الاتصال بالخادم."; }
+      };
+      inp.click();
+    });
   });
 
   const list = $("#campaignList");
