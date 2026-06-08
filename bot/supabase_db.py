@@ -128,7 +128,7 @@ class SupabaseDB:
         for i in range(0, len(rows), 500):
             chunk = rows[i:i + 500]
             self._request(
-                "POST", "/companies", body=chunk,
+                "POST", "/companies?on_conflict=email", body=chunk,
                 headers=self._headers(
                     "resolution=merge-duplicates,return=minimal"),
             )
@@ -336,7 +336,7 @@ class SupabaseDB:
 
     def set_config(self, key: str, value: Any) -> None:
         body = [{"key": key, "value": value, "updated_at": _now()}]
-        self._request("POST", "/app_config", body=body,
+        self._request("POST", "/app_config?on_conflict=key", body=body,
                       headers=self._headers(
                           "resolution=merge-duplicates,return=minimal"))
 
